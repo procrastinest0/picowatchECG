@@ -34,6 +34,7 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display,
 | DS3231 SCL | GP1 |
 | DS3231 VCC | 3V3 |
 | DS3231 GND | GND |
+| Button | GP15 (to GND) |
 
 ## Setup
 
@@ -61,6 +62,12 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display,
 | `watchface.py` | ECG watchface renderer — grid, PQRST traces, labels |
 | `set_time.py` | One-time utility to set the DS3231 clock |
 | `preview.py` | Desktop preview renderer (requires Pillow, not deployed to Pico) |
+
+## Sweep animation
+
+Press the button (GP15) to trigger a sweep animation — the ECG trace travels from left to right across the display like a real heart monitor, then settles at the correct hour and minute positions.
+
+![Sweep Animation](sweep.gif)
 
 ## Display updates
 

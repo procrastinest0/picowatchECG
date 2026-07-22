@@ -1,7 +1,7 @@
 """Desktop preview renderer. Not deployed to the Pico.
 
-Usage: python preview.py [hour24] [minute]
-       python preview.py 15 23   # renders 3:23 PM
+Usage: python preview.py [hour24] [minute]          # static PNG
+       python preview.py [hour24] [minute] --sweep   # animated GIF
 """
 import sys
 from PIL import Image, ImageDraw
@@ -17,6 +17,7 @@ _X0, _X1 = 8, 242
 _XR = _X1 - _X0
 _ECG_HW = 22
 _PK = 42
+SWEEP_STEPS = 20
 
 _ECG = [
     (-1.00, 0.00), (-0.75, 0.00), (-0.62, 0.08), (-0.50, 0.15),
@@ -25,27 +26,6 @@ _ECG = [
     (0.17, -0.03), (0.25, 0.00),  (0.37, 0.05),  (0.50, 0.22),
     (0.62, 0.05),  (0.75, 0.00),  (1.00, 0.00),
 ]
-
-
-def _hx(h):
-    return _X0 + (h - 1) * _XR // 11
-
-
-def _mx(m):
-    return _X0 + m * _XR // 59 if m else _X0
-
-
-def _amp(t):
-    if t <= -1.0 or t >= 1.0:
-        return 0.0
-    for i in range(len(_ECG) - 1):
-        t0, a0 = _ECG[i]
-        t1, a1 = _ECG[i + 1]
-        if t0 <= t <= t1:
-            f = (t - t0) / (t1 - t0) if t1 != t0 else 0.0
-            return a0 + f * (a1 - a0)
-    return 0.0
-
 
 _FONT = {
     ' ': [0x00]*8,
@@ -65,7 +45,25 @@ _FONT = {
 }
 
 
-def render(hour24, minute):
+def _hx(h):
+    return _X0 + (h - 1) * _XR // 11
+
+def _mx(m):
+    return _X0 + m * _XR // 59 if m else _X0
+
+def _amp(t):
+    if t <= -1.0 or t >= 1.0:
+        return 0.0
+    for i in range(len(_ECG) - 1):
+        t0, a0 = _ECG[i]
+        t1, a1 = _ECG[i + 1]
+        if t0 <= t <= t1:
+            f = (t - t0) / (t1 - t0) if t1 != t0 else 0.0
+            return a0 + f * (a1 - a0)
+    return 0.0
+
+
+def render(hour24, minute, sweep_x=W):
     h12 = hour24 % 12 or 12
     pm = hour24 >= 12
 
@@ -111,13 +109,13 @@ def render(hour24, minute):
             if x & 1 == 0:
                 px(x, y, gb)
 
-    # traces
+    # traces (clipped to sweep_x)
     tc = (10, 10, 10)
     hr_px = _hx(h12)
     mn_px = _mx(minute)
     for peak_x, sign in [(hr_px, -1), (mn_px, 1)]:
         prev = _BL
-        for x in range(W):
+        for x in range(min(sweep_x, W)):
             d = x - peak_x
             if -_ECG_HW <= d <= _ECG_HW:
                 off = round(_amp(d / _ECG_HW) * _PK)
@@ -128,6 +126,12 @@ def render(hour24, minute):
             for fy in range(max(0, y0), min(y1 + 1, H)):
                 px(x, fy, tc)
             prev = y
+
+    # sweep cursor
+    if 0 < sweep_x < W:
+        for y in range(_GRID_TOP, _GRID_BOT + 1):
+            if y % 3 != 0:
+                px(sweep_x, y, (60, 60, 60))
 
     # hour labels
     for h in range(1, 13):
@@ -159,9 +163,29 @@ def render(hour24, minute):
     return img
 
 
+def render_sweep_gif(hour24, minute, filename="sweep.gif"):
+    step_w = (W + SWEEP_STEPS - 1) // SWEEP_STEPS
+    frames = []
+    for step in range(SWEEP_STEPS + 1):
+        sx = min(step * step_w, W)
+        frames.append(render(hour24, minute, sweep_x=sx))
+    frames.append(render(hour24, minute))
+    frames[0].save(
+        filename, save_all=True, append_images=frames[1:],
+        duration=150, loop=0,
+    )
+    return len(frames)
+
+
 if __name__ == "__main__":
     h = int(sys.argv[1]) if len(sys.argv) > 1 else 15
     m = int(sys.argv[2]) if len(sys.argv) > 2 else 23
-    img = render(h, m)
-    img.save("preview.png")
-    print(f"Saved preview.png  ({h:02d}:{m:02d}, {'PM' if h>=12 else 'AM'})")
+    sweep = "--sweep" in sys.argv
+
+    if sweep:
+        n = render_sweep_gif(h, m)
+        print(f"Saved sweep.gif  ({h:02d}:{m:02d}, {n} frames)")
+    else:
+        img = render(h, m)
+        img.save("preview.png")
+        print(f"Saved preview.png  ({h:02d}:{m:02d}, {'PM' if h>=12 else 'AM'})")
