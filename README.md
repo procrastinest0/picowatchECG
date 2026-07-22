@@ -1,16 +1,16 @@
 # PicoWatch ECG
 
-An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display, and DS3231 RTC module. Time is displayed as electrocardiogram traces — the PQRST waveform peaks align to the current hour and minute.
+An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display, and DS3231 RTC module. Time is displayed as electrocardiogram traces on a single graph — an upward PQRST spike marks the current hour, a downward spike marks the current minute.
 
 ![ECG Watchface Preview](preview.png)
-*3:23 PM — hour peak at 3, minute peak between 20 and 25 (4x scaled from 250x122)*
+*3:23 PM — upward peak at hour 3, downward peak between minutes 20 and 25 (4x scaled from 250x122)*
 
 ## How to read it
 
-- **Top half** — Hours 1–12. The ECG R-peak spike points at the current hour. The active hour label is inverted (white on black).
-- **Bottom half** — Minutes 0–59. The ECG peak marks the current minute. The nearest 5-minute label is highlighted.
+- **Hours 1–12** are labeled across the top. The ECG R-peak spikes **upward** toward the current hour. The active hour label is inverted (white on black).
+- **Minutes 0–59** are labeled across the bottom (every 5). The ECG R-peak spikes **downward** toward the current minute. The nearest 5-minute label is highlighted.
+- Both traces share a common baseline through the center of the display, with an ECG-paper grid behind them.
 - **AM/PM** indicator sits at the bottom right.
-- The grid background mimics real ECG paper: dot intersections at 5 px intervals, dashed lines every 25 px.
 
 ## Hardware
 

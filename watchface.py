@@ -2,17 +2,9 @@ W = 250
 H = 122
 
 _LBL_HR_Y = 1
-_ECG_HR_TOP = 12
-_BL_HR = 49
-_PK_HR = 33
-
-_DIV_Y = 57
-
-_ECG_MN_TOP = 60
-_BL_MN = 101
-_PK_MN = 31
-_ECG_MN_BOT = 110
-
+_GRID_TOP = 11
+_BL = 61
+_GRID_BOT = 110
 _LBL_MN_Y = 113
 
 _X0 = 8
@@ -20,6 +12,7 @@ _X1 = 242
 _XR = _X1 - _X0
 
 _ECG_HW = 22
+_PK = 42
 
 _ECG = [
     (-1.00, 0.00),
@@ -64,13 +57,6 @@ def _amp(t):
     return 0.0
 
 
-def _ey(x, px, bl, pk):
-    d = x - px
-    if d < -_ECG_HW or d > _ECG_HW:
-        return bl
-    return round(bl - _amp(d / _ECG_HW) * pk)
-
-
 def _grid(fb, yt, yb):
     for y in range(yt, yb + 1, 5):
         for x in range(0, W, 5):
@@ -85,10 +71,15 @@ def _grid(fb, yt, yb):
                 fb.pixel(x, y, 0)
 
 
-def _trace(fb, bl, px, pk):
+def _trace(fb, bl, px, pk, sign):
     prev = bl
     for x in range(W):
-        y = _ey(x, px, bl, pk)
+        d = x - px
+        if -_ECG_HW <= d <= _ECG_HW:
+            off = round(_amp(d / _ECG_HW) * pk)
+        else:
+            off = 0
+        y = bl + sign * off
         y0 = min(prev, y)
         y1 = max(prev, y) + 1
         for fy in range(max(0, y0), min(y1 + 1, H)):
@@ -113,26 +104,15 @@ def draw_watchface(fb, hour12, minute, is_pm):
     for h in range(1, 13):
         _label(fb, h, _hx(h), _LBL_HR_Y, h == hour12)
 
-    fb.text("PM" if is_pm else "AM", 234, _LBL_MN_Y, 0)
+    _grid(fb, _GRID_TOP, _GRID_BOT)
 
-    _grid(fb, _ECG_HR_TOP, _DIV_Y - 2)
-    _trace(fb, _BL_HR, _hx(hour12), _PK_HR)
-
-    for h in range(1, 13):
-        x = _hx(h)
-        fb.vline(x, _BL_HR - 1, 3, 0)
-
-    fb.hline(0, _DIV_Y, W, 0)
-
-    _grid(fb, _ECG_MN_TOP, _ECG_MN_BOT)
-    _trace(fb, _BL_MN, _mx(minute), _PK_MN)
-
-    for m in range(0, 60, 5):
-        x = _mx(m)
-        fb.vline(x, _BL_MN - 1, 3, 0)
+    _trace(fb, _BL, _hx(hour12), _PK, -1)
+    _trace(fb, _BL, _mx(minute), _PK, 1)
 
     near5 = ((minute + 2) // 5) * 5
     if near5 >= 60:
         near5 = 55
     for m in range(0, 60, 5):
         _label(fb, m, _mx(m), _LBL_MN_Y, m == near5)
+
+    fb.text("PM" if is_pm else "AM", 234, _LBL_MN_Y, 0)
