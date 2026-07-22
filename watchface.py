@@ -98,16 +98,19 @@ def _label(fb, val, cx, y, hl=False):
         fb.text(s, max(tx, 0), y, 0)
 
 
-def draw_watchface(fb, hour12, minute, is_pm):
+def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
     fb.fill(1)
+    if fb_red:
+        fb_red.fill(1)
 
     for h in range(1, 13):
         _label(fb, h, _hx(h), _LBL_HR_Y, h == hour12)
 
     _grid(fb, _GRID_TOP, _GRID_BOT)
 
-    _trace(fb, _BL, _hx(hour12), _PK, -1)
-    _trace(fb, _BL, _mx(minute), _PK, 1)
+    tfb = fb_red if fb_red else fb
+    _trace(tfb, _BL, _hx(hour12), _PK, -1)
+    _trace(tfb, _BL, _mx(minute), _PK, 1)
 
     near5 = ((minute + 2) // 5) * 5
     if near5 >= 60:

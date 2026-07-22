@@ -54,6 +54,13 @@ class EPD_2in13_V4:
         )
         self.fb.fill(1)
 
+        self.red_buffer = bytearray(self.WIDTH * pages)
+        self._red_disp_buf = bytearray(len(self.red_buffer))
+        self.fb_red = framebuf.FrameBuffer(
+            self.red_buffer, self.WIDTH, self.HEIGHT, framebuf.MONO_VLSB
+        )
+        self.fb_red.fill(1)
+
     def _cmd(self, cmd, data=None):
         self.cs.value(0)
         self.dc.value(0)
@@ -98,12 +105,20 @@ class EPD_2in13_V4:
         for i in range(len(self.buffer)):
             self._disp_buf[i] = _REV[self.buffer[i]]
 
+    def _prepare_red_buf(self):
+        for i in range(len(self.red_buffer)):
+            self._red_disp_buf[i] = _REV[self.red_buffer[i]]
+
     def display(self):
-        """Full refresh (~2-3 s). Clears any ghosting."""
+        """Full refresh with tri-color (~2-3 s). Clears any ghosting."""
         self._prepare_buf()
+        self._prepare_red_buf()
         self._cmd(0x4E, bytes([0x00]))
         self._cmd(0x4F, bytes([0x00, 0x00]))
         self._cmd(0x24, self._disp_buf)
+        self._cmd(0x4E, bytes([0x00]))
+        self._cmd(0x4F, bytes([0x00, 0x00]))
+        self._cmd(0x26, self._red_disp_buf)
         self._cmd(0x22, bytes([0xF7]))
         self._cmd(0x20)
         self._wait_busy()
@@ -124,6 +139,7 @@ class EPD_2in13_V4:
     def clear(self):
         """Clear display to white with a full refresh."""
         self.fb.fill(1)
+        self.fb_red.fill(1)
         self.display()
 
     def sleep(self):

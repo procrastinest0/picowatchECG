@@ -110,7 +110,7 @@ def render(hour24, minute, sweep_x=W):
                 px(x, y, gb)
 
     # traces (clipped to sweep_x)
-    tc = (10, 10, 10)
+    tc = (200, 30, 30)
     hr_px = _hx(h12)
     mn_px = _mx(minute)
     for peak_x, sign in [(hr_px, -1), (mn_px, 1)]:

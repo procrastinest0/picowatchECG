@@ -1,4 +1,4 @@
-from machine import Pin, SPI, I2C
+from machine import Pin, SPI, I2C, deepsleep
 import time
 from display import EPD_2in13_V4
 from rtc import DS3231
@@ -18,38 +18,26 @@ button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_UP)
 
 epd.init()
 
-FULL_EVERY = 15
-updates = 0
-last_min = -1
+_, _, _, _, hour24, minute, _ = rtc.datetime()
+h12 = hour24 % 12 or 12
+pm = hour24 >= 12
 
-
-def animate_sweep(h12, minute, is_pm):
-    step_w = (W + SWEEP_STEPS - 1) // SWEEP_STEPS
-    for step in range(SWEEP_STEPS + 1):
-        sweep_x = min(step * step_w, W)
-        draw_watchface_sweep(epd.fb, h12, minute, is_pm, sweep_x)
+step_w = (W + SWEEP_STEPS - 1) // SWEEP_STEPS
+for step in range(SWEEP_STEPS + 1):
+    sweep_x = min(step * step_w, W)
+    draw_watchface_sweep(epd.fb, h12, minute, pm, sweep_x)
+    if step == 0:
+        epd.display()
+    else:
         epd.display_partial()
-    draw_watchface(epd.fb, h12, minute, is_pm)
-    epd.display()
 
+draw_watchface(epd.fb, h12, minute, pm, fb_red=epd.fb_red)
+epd.display()
 
-while True:
-    _, _, _, _, hour24, minute, _ = rtc.datetime()
-    h12 = hour24 % 12 or 12
-    pm = hour24 >= 12
+while button.value() == 0:
+    time.sleep_ms(50)
+time.sleep_ms(200)
 
-    if minute != last_min:
-        draw_watchface(epd.fb, h12, minute, pm)
-        if updates % FULL_EVERY == 0:
-            epd.display()
-        else:
-            epd.display_partial()
-        updates += 1
-        last_min = minute
-
-    if button.value() == 0:
-        animate_sweep(h12, minute, pm)
-        while button.value() == 0:
-            time.sleep_ms(50)
-
-    time.sleep(1)
+epd.sleep()
+button.irq(trigger=Pin.IRQ_FALLING)
+deepsleep()

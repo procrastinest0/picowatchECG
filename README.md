@@ -1,6 +1,6 @@
 # PicoWatch ECG
 
-An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display, and DS3231 RTC module. Time is displayed as electrocardiogram traces on a single graph — an upward PQRST spike marks the current hour, a downward spike marks the current minute.
+An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" tri-color e-ink display (black/white/red), and DS3231 RTC module. Time is displayed as electrocardiogram traces on a single graph — a red upward PQRST spike marks the current hour, a red downward spike marks the current minute.
 
 ![ECG Watchface Preview](preview.png)
 *3:23 PM — upward peak at hour 3, downward peak between minutes 20 and 25 (4x scaled from 250x122)*
@@ -17,7 +17,7 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display,
 | Component | Description |
 |---|---|
 | Raspberry Pi Pico | RP2040, running MicroPython |
-| Waveshare 2.13" e-Paper V4 | 250x122, SSD1680 controller, B/W |
+| Waveshare 2.13" e-Paper V4 | 250x122, SSD1680 controller, B/W/R tri-color |
 | DS3231 RTC module | I2C, battery-backed |
 
 ## Wiring
@@ -56,8 +56,8 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display,
 
 | File | Purpose |
 |---|---|
-| `main.py` | Entry point — reads RTC, renders watchface, updates display every minute |
-| `display.py` | SSD1680 e-ink driver configured for landscape mode (250x122) |
+| `main.py` | Entry point — reads RTC, sweep animation, tri-color render, deep sleep |
+| `display.py` | SSD1680 tri-color e-ink driver configured for landscape mode (250x122) |
 | `rtc.py` | DS3231 I2C driver |
 | `watchface.py` | ECG watchface renderer — grid, PQRST traces, labels |
 | `set_time.py` | One-time utility to set the DS3231 clock |
@@ -65,15 +65,19 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" e-ink display,
 
 ## Sweep animation
 
-Press the button (GP15) to trigger a sweep animation — the ECG trace travels from left to right across the display like a real heart monitor, then settles at the correct hour and minute positions.
+Press the button (GP15) to wake the Pico and trigger a sweep animation — the ECG trace travels from left to right across the display like a real heart monitor, then settles at the correct hour and minute positions with **red traces**. The Pico enters deep sleep afterward to conserve power.
 
 ![Sweep Animation](sweep.gif)
 
+## Power management
+
+The Pico enters deep sleep after each display update. Pressing the button on GP15 wakes the Pico, which re-reads the RTC and renders the current time with the sweep animation. The e-ink display retains the last image while the Pico sleeps, so the time stays visible with near-zero power draw.
+
 ## Display updates
 
-- The display does a **full refresh** on the first update and every 15th update to clear ghosting.
-- In between, **partial refresh** is used for faster (~0.3 s) updates.
-- The main loop polls the RTC every second and only redraws when the minute changes.
+- The sweep animation uses **partial refresh** (~0.3 s per frame) in black/white for speed.
+- The final frame uses a **full tri-color refresh** (~2-3 s) to render the ECG traces in red.
+- The display enters sleep mode along with the Pico after each update.
 
 ## Desktop preview
 
