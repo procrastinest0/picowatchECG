@@ -44,10 +44,10 @@ _FONT = {
 
 
 def _hx(h):
-    return _X0 + (h - 1) * _XR // 11
+    return _X0 + (h - 1) * 5 * _XR // 59
 
 def _mx(m):
-    return _X0 + m * _XR // 55 if m else _X0
+    return _X0 + m * _XR // 59 if m else _X0
 
 def _amp(t):
     if t <= -1.0 or t >= 1.0:
