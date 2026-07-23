@@ -71,9 +71,9 @@ def _grid(fb, yt, yb):
                 fb.pixel(x, y, 0)
 
 
-def _trace(fb, bl, px, pk, sign, end_x=W, color=0):
+def _trace(fb, bl, px, pk, sign, color=0):
     prev = bl
-    for x in range(min(end_x, W)):
+    for x in range(W):
         d = x - px
         if -_ECG_HW <= d <= _ECG_HW:
             off = round(_amp(d / _ECG_HW) * pk)
@@ -102,8 +102,8 @@ def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
     fb.fill(1)
     if fb_red:
         fb_red.fill(0)
-        _trace(fb_red, _BL, _hx(hour12), _PK, -1, W, 1)
-        _trace(fb_red, _BL, _mx(minute), _PK, 1, W, 1)
+        _trace(fb_red, _BL, _hx(hour12), _PK, -1, 1)
+        _trace(fb_red, _BL, _mx(minute), _PK, 1, 1)
     else:
         _trace(fb, _BL, _hx(hour12), _PK, -1)
         _trace(fb, _BL, _mx(minute), _PK, 1)
@@ -120,28 +120,3 @@ def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
         _label(fb, m, _mx(m), _LBL_MN_Y, m == near5)
 
     fb.text("PM" if is_pm else "AM", 234, _LBL_MN_Y, 0)
-
-
-def draw_watchface_sweep(fb, hour12, minute, is_pm, sweep_x):
-    fb.fill(1)
-
-    for h in range(1, 13):
-        _label(fb, h, _hx(h), _LBL_HR_Y, h == hour12)
-
-    near5 = ((minute + 2) // 5) * 5
-    if near5 >= 60:
-        near5 = 55
-    for m in range(0, 60, 5):
-        _label(fb, m, _mx(m), _LBL_MN_Y, m == near5)
-
-    fb.text("PM" if is_pm else "AM", 234, _LBL_MN_Y, 0)
-
-    _grid(fb, _GRID_TOP, _GRID_BOT)
-
-    _trace(fb, _BL, _hx(hour12), _PK, -1, sweep_x)
-    _trace(fb, _BL, _mx(minute), _PK, 1, sweep_x)
-
-    if 0 < sweep_x < W:
-        for y in range(_GRID_TOP, _GRID_BOT + 1):
-            if y % 3 != 0:
-                fb.pixel(sweep_x, y, 0)

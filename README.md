@@ -58,28 +58,21 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" tri-color e-in
 
 | File | Purpose |
 |---|---|
-| `main.py` | Entry point — reads RTC, sweep animation, tri-color render, deep sleep |
+| `main.py` | Entry point — reads RTC, tri-color render, sleep until button press |
 | `display.py` | SSD1680 tri-color e-ink driver configured for landscape mode (250x122) |
 | `rtc.py` | DS3231 I2C driver |
 | `watchface.py` | ECG watchface renderer — grid, PQRST traces, labels |
 | `set_time.py` | One-time utility to set the DS3231 clock |
 | `preview.py` | Desktop preview renderer (requires Pillow, not deployed to Pico) |
 
-## Sweep animation
-
-Press the button (GP15) to wake the Pico and trigger a sweep animation — the ECG trace travels from left to right across the display like a real heart monitor, then settles at the correct hour and minute positions with **red traces**. The Pico enters deep sleep afterward to conserve power.
-
-![Sweep Animation](sweep.gif)
-
 ## Power management
 
-The Pico enters deep sleep after each display update. Pressing the button on GP15 wakes the Pico, which re-reads the RTC and renders the current time with the sweep animation. The e-ink display retains the last image while the Pico sleeps, so the time stays visible with near-zero power draw.
+The Pico sleeps after each display update. Pressing the button on GP15 wakes the Pico, which re-reads the RTC and renders the current time. The e-ink display retains the last image while the Pico sleeps, so the time stays visible with near-zero power draw.
 
 ## Display updates
 
-- The sweep animation uses **partial refresh** (~0.3 s per frame) in black/white for speed.
-- The final frame uses a **full tri-color refresh** (~2-3 s) to render the ECG traces in red.
-- The display enters sleep mode along with the Pico after each update.
+- Each update uses a **full tri-color refresh** (~2-3 s) to render the ECG traces in red and the grid/labels in black.
+- The display and Pico enter sleep mode after each update.
 
 ## Desktop preview
 

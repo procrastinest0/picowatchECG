@@ -1,7 +1,6 @@
 """Desktop preview renderer. Not deployed to the Pico.
 
-Usage: python preview.py [hour24] [minute]          # static PNG
-       python preview.py [hour24] [minute] --sweep   # animated GIF
+Usage: python preview.py [hour24] [minute]
 """
 import sys
 from PIL import Image, ImageDraw
@@ -17,7 +16,6 @@ _X0, _X1 = 8, 242
 _XR = _X1 - _X0
 _ECG_HW = 22
 _PK = 42
-SWEEP_STEPS = 20
 
 _ECG = [
     (-1.00, 0.00), (-0.75, 0.00), (-0.62, 0.08), (-0.50, 0.15),
@@ -63,7 +61,7 @@ def _amp(t):
     return 0.0
 
 
-def render(hour24, minute, sweep_x=W):
+def render(hour24, minute):
     h12 = hour24 % 12 or 12
     pm = hour24 >= 12
 
@@ -109,13 +107,13 @@ def render(hour24, minute, sweep_x=W):
             if x & 1 == 0:
                 px(x, y, gb)
 
-    # traces (clipped to sweep_x)
+    # traces
     tc = (200, 30, 30)
     hr_px = _hx(h12)
     mn_px = _mx(minute)
     for peak_x, sign in [(hr_px, -1), (mn_px, 1)]:
         prev = _BL
-        for x in range(min(sweep_x, W)):
+        for x in range(W):
             d = x - peak_x
             if -_ECG_HW <= d <= _ECG_HW:
                 off = round(_amp(d / _ECG_HW) * _PK)
@@ -126,12 +124,6 @@ def render(hour24, minute, sweep_x=W):
             for fy in range(max(0, y0), min(y1 + 1, H)):
                 px(x, fy, tc)
             prev = y
-
-    # sweep cursor
-    if 0 < sweep_x < W:
-        for y in range(_GRID_TOP, _GRID_BOT + 1):
-            if y % 3 != 0:
-                px(sweep_x, y, (60, 60, 60))
 
     # hour labels
     for h in range(1, 13):
@@ -163,29 +155,9 @@ def render(hour24, minute, sweep_x=W):
     return img
 
 
-def render_sweep_gif(hour24, minute, filename="sweep.gif"):
-    step_w = (W + SWEEP_STEPS - 1) // SWEEP_STEPS
-    frames = []
-    for step in range(SWEEP_STEPS + 1):
-        sx = min(step * step_w, W)
-        frames.append(render(hour24, minute, sweep_x=sx))
-    frames.append(render(hour24, minute))
-    frames[0].save(
-        filename, save_all=True, append_images=frames[1:],
-        duration=150, loop=0,
-    )
-    return len(frames)
-
-
 if __name__ == "__main__":
     h = int(sys.argv[1]) if len(sys.argv) > 1 else 15
     m = int(sys.argv[2]) if len(sys.argv) > 2 else 23
-    sweep = "--sweep" in sys.argv
-
-    if sweep:
-        n = render_sweep_gif(h, m)
-        print(f"Saved sweep.gif  ({h:02d}:{m:02d}, {n} frames)")
-    else:
-        img = render(h, m)
-        img.save("preview.png")
-        print(f"Saved preview.png  ({h:02d}:{m:02d}, {'PM' if h>=12 else 'AM'})")
+    img = render(h, m)
+    img.save("preview.png")
+    print(f"Saved preview.png  ({h:02d}:{m:02d}, {'PM' if h>=12 else 'AM'})")
