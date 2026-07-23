@@ -103,10 +103,10 @@ def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
     if fb_red:
         fb_red.fill(0)
         _trace(fb_red, _BL, _hx(hour12), _PK, -1, 1)
-        _trace(fb_red, _BL, _mx(minute), _PK, 1, 1)
+        _trace(fb_red, _BL, _mx(minute + 2), _PK, 1, 1)
     else:
         _trace(fb, _BL, _hx(hour12), _PK, -1)
-        _trace(fb, _BL, _mx(minute), _PK, 1)
+        _trace(fb, _BL, _mx(minute + 2), _PK, 1)
 
     for h in range(1, 13):
         _label(fb, h, _hx(h), _LBL_HR_Y, h == hour12)
