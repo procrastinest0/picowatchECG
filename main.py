@@ -1,4 +1,4 @@
-from machine import Pin, SPI, I2C, deepsleep
+from machine import Pin, SPI, I2C, lightsleep, reset
 import time
 from display import EPD_2in13_V4
 from rtc import DS3231
@@ -40,4 +40,5 @@ time.sleep_ms(200)
 
 epd.sleep()
 button.irq(trigger=Pin.IRQ_FALLING)
-deepsleep()
+lightsleep()
+reset()
