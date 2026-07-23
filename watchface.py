@@ -42,7 +42,7 @@ def _hx(h):
 
 
 def _mx(m):
-    return _X0 + m * _XR // 59 if m else _X0
+    return _X0 + m * _XR // 55 if m else _X0
 
 
 def _amp(t):
