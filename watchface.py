@@ -114,9 +114,9 @@ def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
     _grid(fb, _GRID_TOP, _GRID_BOT)
 
     near5 = ((minute + 2) // 5) * 5
-    if near5 >= 60:
-        near5 = 55
-    for m in range(0, 60, 5):
+    if near5 > 60:
+        near5 = 60
+    for m in range(0, 65, 5):
         _label(fb, m, _mx(m), _LBL_MN_Y, m == near5)
 
-    fb.text("PM" if is_pm else "AM", 234, _LBL_MN_Y, 0)
+    fb.text("PM" if is_pm else "AM", 234, _LBL_HR_Y, 0)

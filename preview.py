@@ -138,9 +138,9 @@ def render(hour24, minute):
 
     # minute labels
     near5 = ((minute + 2) // 5) * 5
-    if near5 >= 60:
-        near5 = 55
-    for m in range(0, 60, 5):
+    if near5 > 60:
+        near5 = 60
+    for m in range(0, 65, 5):
         s = str(m)
         tw = len(s) * 8
         tx = _mx(m) - tw // 2
@@ -150,7 +150,7 @@ def render(hour24, minute):
         else:
             text(s, max(tx, 0), _LBL_MN_Y)
 
-    text("PM" if pm else "AM", 234, _LBL_MN_Y)
+    text("PM" if pm else "AM", 234, _LBL_HR_Y)
 
     return img
 
