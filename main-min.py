@@ -24,10 +24,13 @@ while True:
     if minute != last_min:
         h12 = hour24 % 12 or 12
         pm = hour24 >= 12
-        draw_watchface(epd.fb, h12, minute, pm, fb_red=epd.fb_red)
         if updates % FULL_EVERY == 0:
+            epd.init()
+            draw_watchface(epd.fb, h12, minute, pm, fb_red=epd.fb_red)
             epd.display()
+            epd.init_partial()
         else:
+            draw_watchface(epd.fb, h12, minute, pm)
             epd.display_partial()
         updates += 1
         last_min = minute
