@@ -59,7 +59,7 @@ class EPD_2in13_V4:
         self.fb_red = framebuf.FrameBuffer(
             self.red_buffer, self.WIDTH, self.HEIGHT, framebuf.MONO_VLSB
         )
-        self.fb_red.fill(1)
+        self.fb_red.fill(0)
 
     def _cmd(self, cmd, data=None):
         self.cs.value(0)
@@ -139,7 +139,7 @@ class EPD_2in13_V4:
     def clear(self):
         """Clear display to white with a full refresh."""
         self.fb.fill(1)
-        self.fb_red.fill(1)
+        self.fb_red.fill(0)
         self.display()
 
     def sleep(self):

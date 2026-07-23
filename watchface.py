@@ -71,7 +71,7 @@ def _grid(fb, yt, yb):
                 fb.pixel(x, y, 0)
 
 
-def _trace(fb, bl, px, pk, sign, end_x=W):
+def _trace(fb, bl, px, pk, sign, end_x=W, color=0):
     prev = bl
     for x in range(min(end_x, W)):
         d = x - px
@@ -83,7 +83,7 @@ def _trace(fb, bl, px, pk, sign, end_x=W):
         y0 = min(prev, y)
         y1 = max(prev, y) + 1
         for fy in range(max(0, y0), min(y1 + 1, H)):
-            fb.pixel(x, fy, 0)
+            fb.pixel(x, fy, color)
         prev = y
 
 
@@ -101,16 +101,17 @@ def _label(fb, val, cx, y, hl=False):
 def draw_watchface(fb, hour12, minute, is_pm, fb_red=None):
     fb.fill(1)
     if fb_red:
-        fb_red.fill(1)
+        fb_red.fill(0)
+        _trace(fb_red, _BL, _hx(hour12), _PK, -1, W, 1)
+        _trace(fb_red, _BL, _mx(minute), _PK, 1, W, 1)
+    else:
+        _trace(fb, _BL, _hx(hour12), _PK, -1)
+        _trace(fb, _BL, _mx(minute), _PK, 1)
 
     for h in range(1, 13):
         _label(fb, h, _hx(h), _LBL_HR_Y, h == hour12)
 
     _grid(fb, _GRID_TOP, _GRID_BOT)
-
-    tfb = fb_red if fb_red else fb
-    _trace(tfb, _BL, _hx(hour12), _PK, -1)
-    _trace(tfb, _BL, _mx(minute), _PK, 1)
 
     near5 = ((minute + 2) // 5) * 5
     if near5 >= 60:
