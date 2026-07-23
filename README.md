@@ -22,10 +22,12 @@ An ECG-style watchface for the Raspberry Pi Pico, Waveshare 2.13" tri-color e-in
 
 ## Wiring
 
-| Signal | Pico Pin |
+| Display Pin | Pico Pin |
 |---|---|
-| E-ink SPI SCK | GP10 |
-| E-ink SPI MOSI | GP11 |
+| E-ink VCC | 3V3 |
+| E-ink GND | GND |
+| E-ink DIN | GP11 (SPI1 MOSI) |
+| E-ink CLK | GP10 (SPI1 SCK) |
 | E-ink CS | GP9 |
 | E-ink DC | GP8 |
 | E-ink RST | GP12 |
