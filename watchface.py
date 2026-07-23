@@ -58,14 +58,16 @@ def _amp(t):
 
 
 def _grid(fb, yt, yb):
-    for y in range(yt, yb + 1, 5):
-        for x in range(0, W, 5):
+    for m in range(61):
+        x = _mx(m)
+        for y in range(yt, yb + 1, 4):
             fb.pixel(x, y, 0)
-    for x in range(0, W, 25):
+    for m in range(0, 65, 5):
+        x = _mx(m)
         for y in range(yt, yb + 1):
             if y & 1 == 0:
                 fb.pixel(x, y, 0)
-    for y in range(yt, yb + 1, 25):
+    for y in range(yt, yb + 1, 20):
         for x in range(0, W):
             if x & 1 == 0:
                 fb.pixel(x, y, 0)

@@ -95,14 +95,16 @@ def render(hour24, minute):
     # grid
     gc = (180, 180, 175)
     gb = (140, 140, 135)
-    for y in range(_GRID_TOP, _GRID_BOT + 1, 5):
-        for x in range(0, W, 5):
+    for m in range(61):
+        x = _mx(m)
+        for y in range(_GRID_TOP, _GRID_BOT + 1, 4):
             px(x, y, gc)
-    for x in range(0, W, 25):
+    for m in range(0, 65, 5):
+        x = _mx(m)
         for y in range(_GRID_TOP, _GRID_BOT + 1):
             if y & 1 == 0:
                 px(x, y, gb)
-    for y in range(_GRID_TOP, _GRID_BOT + 1, 25):
+    for y in range(_GRID_TOP, _GRID_BOT + 1, 20):
         for x in range(0, W):
             if x & 1 == 0:
                 px(x, y, gb)
