@@ -110,7 +110,7 @@ def render(hour24, minute):
     # traces
     tc = (200, 30, 30)
     hr_px = _hx(h12)
-    mn_px = _mx(minute + 2)
+    mn_px = _mx(minute + 4)
     for peak_x, sign in [(hr_px, -1), (mn_px, 1)]:
         prev = _BL
         for x in range(W):
